@@ -1,0 +1,33 @@
+{
+  "name": "hypercore-replicate",
+  "version": "0.0.1",
+  "description": "A simple function to replicate multiple hypercores.",
+  "main": "index.js",
+  "scripts": {
+    "test": "tape test.js"
+  },
+  "keywords": [
+    "hypercore",
+    "replicate",
+    "pump"
+  ],
+  "author": "Joseph Werle <joseph.werle@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "hypercore": "^7.0.0",
+    "random-access-memory": "^3.1.1",
+    "tape": "^4.10.1"
+  },
+  "dependencies": {
+    "once": "^1.4.0",
+    "pump": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwerle/hypercore-replicate.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jwerle/hypercore-replicate/issues"
+  },
+  "homepage": "https://github.com/jwerle/hypercore-replicate#readme"
+}

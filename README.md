@@ -13,7 +13,7 @@ $ npm install hypercore-replicate
 
 ```js
 const replicate = require('hypercore-replicate')
-replicate(first, second, third, opts, callback)
+replicate(...hypercores, opts, callback)
 ```
 
 ## Example

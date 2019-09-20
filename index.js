@@ -65,8 +65,12 @@ function replicate(...hypercores) {
   }
 
   for (const stream of streams) {
-    if (first) {
-      prev = first.replicate(clone(opts))
+    if (first && !prev) {
+      if ('noiseKeyPair' in first) {
+        prev = replicateCore(first, true, clone(opts))
+      } else {
+        prev = replicateCore(first, clone(opts))
+      }
     }
 
     const replica = pump(prev, stream, prev, onend)
@@ -108,13 +112,22 @@ function replicate(...hypercores) {
   }
 }
 
+function replicateCore(core, ...args) {
+  return core.replicate(...args)
+}
+
 function isHypercore(value) {
   return value && 'object' === typeof value && value.key && value.discoveryKey
 }
 
 function replicatePair(first, second, opts, cb) {
-  const stream = first.replicate(clone(opts))
-  return pump(stream, second.replicate(clone(opts)), stream, cb)
+  if ('noiseKeyPair' in first) {
+    const stream = replicateCore(first, true, clone(opts))
+    return pump(stream, replicateCore(second, false, clone(opts)), stream, cb)
+  } else {
+    const stream = replicateCore(first, clone(opts))
+    return pump(stream, replicateCore(second, clone(opts)), stream, cb)
+  }
 }
 
 module.exports = replicate

@@ -14,7 +14,7 @@
   "author": "Joseph Werle <joseph.werle@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "hypercore": "^7.0.0",
+    "hypercore": "^8.0.2",
     "random-access-memory": "^3.1.1",
     "tape": "^4.10.1"
   },

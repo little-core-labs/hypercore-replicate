@@ -46,7 +46,7 @@ test('replicate(a, b, stream) - feed pair with stream', (t) => {
   a.ready(() => {
     const b = hypercore(ram, a.key)
     const c = hypercore(ram, a.key)
-    replicate(a, b, c.replicate(), (err) => {
+    replicate(a, b, replicate(c), (err) => {
       t.ok(null === err, 'callback called without error')
       b.head((err, buf) => {
         t.ok(0 === Buffer.compare(message, buf), 'a replicates into b')
@@ -65,7 +65,7 @@ test('replicate(a, b) - stream pair', (t) => {
   a.append(message)
   a.ready(() => {
     const b = hypercore(ram, a.key)
-    replicate(a.replicate(), b.replicate(), (err) => {
+    replicate(replicate(a), replicate(b), (err) => {
       t.ok(null === err, 'callback called without error')
       b.head((err, buf) => {
         t.ok(0 === Buffer.compare(message, buf), 'a replicates into b')
@@ -82,7 +82,7 @@ test('replicate(a, b, c) - single feed with stream pair', (t) => {
   a.ready(() => {
     const b = hypercore(ram, a.key)
     const c = hypercore(ram, a.key)
-    replicate(a, b.replicate(), c.replicate(), (err) => {
+    replicate(a, replicate(b), replicate(c), (err) => {
       t.ok(null === err, 'callback called without error')
       b.head((err, buf) => {
         t.ok(0 === Buffer.compare(message, buf), 'a replicates into b')

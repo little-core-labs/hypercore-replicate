@@ -1,3 +1,4 @@
+const ready = require('hypercore-ready')
 const once = require('once')
 const pump = require('pump')
 
@@ -12,7 +13,6 @@ function replicate(...hypercores) {
   let destroyed = false
   let missing = 0
   let first = null
-  let prev = null
   let opts = null
   let cb = null
 
@@ -20,7 +20,7 @@ function replicate(...hypercores) {
     if (isHypercore(feed)) {
       if (!first) {
         first = feed
-      } else {
+      } else if (feed !== first) {
         feeds.add(feed)
       }
     } else if (feed && feed.push && feed.pipe) {
@@ -41,49 +41,41 @@ function replicate(...hypercores) {
     opts = {}
   }
 
-  prev = first
   cb = once(cb)
 
-  for (const feed of feeds) {
-    const replica = replicatePair(prev, feed, opts, onend)
+  return ready(...feeds, onready)
 
-    if (replica.live) {
+  function onready(err, pend, total) {
+    let prev = first
+    let tail = null
+
+    if (err) { return onerror }
+
+    for (const feed of feeds) {
+      const replica = replicatePair(first, feed, opts, onend)
+
       prev = feed
+
+      missing++
+      pending.add(replica)
     }
 
-    missing++
-    pending.add(replica)
-  }
+    for (const stream of streams) {
+      if (prev) {
+        const from = replicateCore(first, false, clone(opts))
+        tail = pump(stream, from, stream, onend)
+      } else if (tail) {
+        tail = pump(stream, tail, stream, onend)
+      }
 
-  if (!prev) {
-    prev = first
-  }
-
-  if (!prev) {
-    prev = [ ...streams ][0]
-    streams.delete(prev)
-  }
-
-  for (const stream of streams) {
-    if (first && !prev) {
-      if ('noiseKeyPair' in first) {
-        prev = replicateCore(first, true, clone(opts))
+      if (tail) {
+        missing++
+        pending.add(tail)
       } else {
-        prev = replicateCore(first, clone(opts))
+        tail = stream
       }
     }
-
-    const replica = pump(prev, stream, prev, onend)
-
-    if (!first && replica.live) {
-      prev = stream
-    }
-
-    missing++
-    pending.add(replica)
   }
-
-  return prev
 
   function destroy() {
     for (const entry of pending) {
@@ -117,13 +109,13 @@ function replicateCore(core, ...args) {
 }
 
 function isHypercore(value) {
-  return value && 'object' === typeof value && value.key && value.discoveryKey
+  return value && 'object' === typeof value && 'function' === typeof value.replicate
 }
 
 function replicatePair(first, second, opts, cb) {
   if ('noiseKeyPair' in first) {
-    const stream = replicateCore(first, true, clone(opts))
-    return pump(stream, replicateCore(second, false, clone(opts)), stream, cb)
+    const stream = replicateCore(first, false, clone(opts))
+    return pump(stream, replicateCore(second, true, clone(opts)), stream, cb)
   } else {
     const stream = replicateCore(first, clone(opts))
     return pump(stream, replicateCore(second, clone(opts)), stream, cb)

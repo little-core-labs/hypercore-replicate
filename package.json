@@ -1,6 +1,6 @@
 {
   "name": "hypercore-replicate",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A simple function to replicate multiple hypercores.",
   "main": "index.js",
   "scripts": {
